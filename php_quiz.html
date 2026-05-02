@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PHP & Backend Development — Master Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #1a1a26;
+    --border: #2a2a40;
+    --accent: #7c6af7;
+    --accent2: #f97066;
+    --accent3: #34d399;
+    --text: #e8e8f0;
+    --muted: #888899;
+    --correct: #34d399;
+    --wrong: #f97066;
+    --tag-bg: #1e1e30;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+  /* NOISE TEXTURE */
+  body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.4;}
+
+  /* HEADER */
+  header{position:relative;padding:60px 40px 40px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,#0f0f1a 0%,#0a0a0f 100%);}
+  .header-grid{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr auto;gap:20px;align-items:end;}
+  .logo-tag{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px;}
+  h1{font-size:clamp(2rem,5vw,3.5rem);font-weight:800;line-height:1.05;letter-spacing:-1px;}
+  h1 span{color:var(--accent);}
+  .subtitle{color:var(--muted);font-size:15px;margin-top:10px;font-family:'JetBrains Mono',monospace;}
+  .stats-bar{display:flex;gap:24px;flex-wrap:wrap;margin-top:30px;}
+  .stat{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 18px;}
+  .stat-n{font-size:22px;font-weight:800;color:var(--accent);}
+  .stat-l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-family:'JetBrains Mono',monospace;}
+  .mode-btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;}
+  .btn{padding:10px 20px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;font-family:'Syne',sans-serif;font-size:13px;font-weight:600;transition:all .2s;}
+  .btn:hover{border-color:var(--accent);color:var(--accent);}
+  .btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .btn-danger{border-color:var(--accent2);color:var(--accent2);}
+  .btn-danger:hover{background:var(--accent2);color:#fff;}
+  .btn-success{border-color:var(--accent3);color:var(--accent3);}
+  .btn-success:hover{background:var(--accent3);color:#111;}
+
+  /* PROGRESS */
+  .progress-wrap{max-width:1100px;margin:0 auto;padding:20px 40px;}
+  .progress-bar-bg{height:4px;background:var(--border);border-radius:2px;}
+  .progress-bar-fill{height:4px;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width .4s ease;}
+  .progress-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-top:6px;}
+
+  /* SECTION TABS */
+  .section-nav{max-width:1100px;margin:0 auto 0;padding:0 40px;display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--border);padding-bottom:0;}
+  .sec-tab{padding:10px 14px;border:none;background:none;color:var(--muted);cursor:pointer;font-family:'Syne',sans-serif;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;}
+  .sec-tab:hover{color:var(--text);}
+  .sec-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+  /* MAIN LAYOUT */
+  main{max-width:1100px;margin:0 auto;padding:30px 40px 80px;}
+
+  /* SECTION HEADER */
+  .section-header{display:flex;align-items:center;gap:14px;margin-bottom:24px;margin-top:10px;padding-bottom:16px;border-bottom:1px solid var(--border);}
+  .section-num{width:36px;height:36px;border-radius:6px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#fff;flex-shrink:0;}
+  .section-title{font-size:1.1rem;font-weight:800;}
+  .section-count{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-left:auto;}
+
+  /* QUESTION CARD */
+  .question-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:14px;transition:border-color .2s;position:relative;overflow:hidden;}
+  .question-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--border);transition:background .2s;}
+  .question-card.answered::before{background:var(--accent);}
+  .question-card.correct::before{background:var(--correct);}
+  .question-card.wrong::before{background:var(--wrong);}
+  .q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+  .q-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);background:var(--tag-bg);padding:3px 8px;border-radius:4px;flex-shrink:0;margin-top:2px;}
+  .q-text{font-size:15px;font-weight:600;line-height:1.5;}
+  .q-text code{background:var(--tag-bg);color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:13px;padding:1px 5px;border-radius:3px;}
+  .code-block{background:#0d0d18;border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#c9d1d9;margin:10px 0;line-height:1.7;overflow-x:auto;white-space:pre;}
+  .kw{color:#ff79c6;}
+  .fn{color:#50fa7b;}
+  .str{color:#f1fa8c;}
+  .cm{color:#6272a4;}
+  .nb{color:#8be9fd;}
+
+  /* OPTIONS */
+  .options{display:grid;gap:8px;}
+  .option{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;transition:all .2s;font-size:14px;}
+  .option:hover{border-color:var(--accent);background:#1a1a30;}
+  .option.selected{border-color:var(--accent);background:#1a1a30;}
+  .option.correct-ans{border-color:var(--correct);background:#0d2018;color:var(--correct);}
+  .option.wrong-ans{border-color:var(--wrong);background:#200d0d;color:var(--wrong);}
+  .option.reveal-correct{border-color:var(--correct);background:#0d2018;color:var(--correct);}
+  .opt-letter{width:26px;height:26px;border-radius:5px;background:var(--tag-bg);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;flex-shrink:0;}
+  .option.correct-ans .opt-letter,.option.reveal-correct .opt-letter{background:var(--correct);color:#fff;}
+  .option.wrong-ans .opt-letter{background:var(--wrong);color:#fff;}
+
+  /* EXPLANATION */
+  .explanation{margin-top:12px;padding:12px 14px;background:#0f1a20;border:1px solid #1a3040;border-radius:8px;font-size:13px;color:#a0c4d0;line-height:1.6;display:none;}
+  .explanation.show{display:block;}
+  .explanation strong{color:var(--accent3);}
+  .explanation code{background:var(--tag-bg);color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:12px;padding:1px 5px;border-radius:3px;}
+
+  /* DIFFICULTY BADGE */
+  .diff{font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 7px;border-radius:3px;font-weight:700;letter-spacing:.5px;flex-shrink:0;}
+  .diff-easy{background:#0d2018;color:var(--correct);border:1px solid #1a4030;}
+  .diff-med{background:#1a1500;color:#fbbf24;border:1px solid #3a3000;}
+  .diff-hard{background:#200d0d;color:var(--wrong);border:1px solid #400d0d;}
+
+  /* SCORECARD */
+  #scorecard{display:none;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px;text-align:center;margin-bottom:30px;}
+  .score-big{font-size:5rem;font-weight:800;color:var(--accent);}
+  .score-sub{color:var(--muted);font-size:15px;margin-top:6px;}
+  .score-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:30px;}
+  .score-cell{background:var(--surface2);border-radius:10px;padding:20px;border:1px solid var(--border);}
+  .score-cell-n{font-size:2rem;font-weight:800;}
+  .score-cell-l{font-size:12px;color:var(--muted);margin-top:4px;font-family:'JetBrains Mono',monospace;}
+
+  /* SECTION PANEL */
+  .section-panel{display:none;}
+  .section-panel.active{display:block;}
+
+  /* ANSWER KEY MODE */
+  .key-badge{display:none;background:var(--accent3);color:#0a2010;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;}
+  body.key-mode .key-badge{display:inline-block;}
+  body.key-mode .option.reveal-correct{border-color:var(--correct);background:#0d2018;color:var(--correct);}
+  body.key-mode .explanation{display:block;}
+
+  /* RESPONSIVE */
+  @media(max-width:700px){
+    header,main,.progress-wrap,.section-nav{padding-left:16px;padding-right:16px;}
+    .header-grid{grid-template-columns:1fr;}
+    .score-big{font-size:3.5rem;}
+    .score-grid{grid-template-columns:1fr 1fr;}
+    .section-nav{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none;}
+  }
+
+  /* ANIMATIONS */
+  @keyframes slideIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+  .question-card{animation:slideIn .3s ease both;}
+  .section-panel.active .question-card:nth-child(n){animation-delay:calc(var(--i,0)*.03s);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-grid">
+    <div>
+      <div class="logo-tag">// Master Quiz Series · 2025</div>
+      <h1>PHP & <span>Backend</span><br>Development</h1>
+      <p class="subtitle">150 Questions · 7 Sections · Full Answer Key</p>
+      <div class="stats-bar">
+        <div class="stat"><div class="stat-n">150</div><div class="stat-l">Questions</div></div>
+        <div class="stat"><div class="stat-n">7</div><div class="stat-l">Sections</div></div>
+        <div class="stat"><div class="stat-n" id="answered-count">0</div><div class="stat-l">Answered</div></div>
+        <div class="stat"><div class="stat-n" id="score-count">—</div><div class="stat-l">Score</div></div>
+      </div>
+      <div class="mode-btns" style="margin-top:20px;">
+        <button class="btn active" onclick="setMode('quiz')">📝 Quiz Mode</button>
+        <button class="btn" onclick="setMode('key')">🗝️ Answer Key</button>
+        <button class="btn btn-success" onclick="submitQuiz()">✓ Submit & Grade</button>
+        <button class="btn btn-danger" onclick="resetQuiz()">↺ Reset</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-fill" style="width:0%"></div></div>
+  <div class="progress-label" id="prog-label">0 / 150 answered</div>
+</div>
+
+<div id="scorecard">
+  <div class="score-big" id="final-pct">0%</div>
+  <div class="score-sub" id="final-label">Quiz Result</div>
+  <div class="score-grid">
+    <div class="score-cell"><div class="score-cell-n" style="color:var(--correct)" id="sc-correct">0</div><div class="score-cell-l">Correct</div></div>
+    <div class="score-cell"><div class="score-cell-n" style="color:var(--wrong)" id="sc-wrong">0</div><div class="score-cell-l">Wrong</div></div>
+    <div class="score-cell"><div class="score-cell-n" style="color:var(--muted)" id="sc-skip">0</div><div class="score-cell-l">Skipped</div></div>
+  </div>
+</div>
+
+<nav class="section-nav" id="sec-nav"></nav>
+
+<main id="main-content"></main>
+
+<script>
+const SECTIONS = [
+  { id:'s1', title:'Intro to Backend Development', color:'#7c6af7', questions:[
+    {q:'What is backend development primarily concerned with?',opts:['Visual presentation of web pages','Server-side logic, databases, and APIs','Styling and animations','Browser rendering'],a:1,diff:'easy',exp:'Backend development handles server-side logic, data processing, databases, authentication, and APIs — everything the user does not directly see.'},
+    {q:'Which of the following best describes a web server?',opts:['A browser plugin that renders HTML','Software/hardware that receives HTTP requests and returns responses','A CSS preprocessor','A JavaScript runtime'],a:1,diff:'easy',exp:'A web server (e.g., Apache, Nginx) listens for HTTP/HTTPS requests and responds with resources like HTML, JSON, or files.'},
+    {q:'What does HTTP stand for?',opts:['HyperText Transfer Protocol','High-Traffic Transfer Process','Hyper Terminal Transfer Protocol','HyperText Transport Procedure'],a:0,diff:'easy',exp:'HTTP stands for HyperText Transfer Protocol — the foundation of data communication on the web.'},
+    {q:'Which HTTP method is conventionally used to CREATE a resource on the server?',opts:['GET','PUT','POST','DELETE'],a:2,diff:'easy',exp:'POST is used to submit data to create a new resource. GET retrieves, PUT updates/replaces, DELETE removes.'},
+    {q:'A 404 HTTP status code means:',opts:['Internal server error','Request succeeded','Resource not found','Unauthorized access'],a:2,diff:'easy',exp:'404 Not Found means the server could not locate the requested resource.'},
+    {q:'What is the role of a database in backend development?',opts:['To style HTML elements','To persist and retrieve structured data','To compile PHP code','To manage CSS variables'],a:1,diff:'easy',exp:'Databases store persistent data that the backend reads, writes, updates, and deletes throughout the application lifecycle.'},
+    {q:'Which of the following is a relational database management system?',opts:['MongoDB','Redis','MySQL','Cassandra'],a:2,diff:'easy',exp:'MySQL is a relational DBMS using tables and SQL. MongoDB is document-based, Redis is key-value, Cassandra is wide-column.'},
+    {q:'What is an API in the context of web development?',opts:['A PHP function library','A protocol for two applications to communicate','A type of CSS framework','A database query language'],a:1,diff:'easy',exp:'An API (Application Programming Interface) defines how software components communicate — commonly over HTTP using JSON or XML.'},
+    {q:'Which of the following is NOT a backend language?',opts:['PHP','Python','CSS','Node.js'],a:2,diff:'easy',exp:'CSS is a styling language for the frontend. PHP, Python, and Node.js all execute on the server.'},
+    {q:'What does "stateless" mean in the context of HTTP?',opts:['The server never stores any data','Each HTTP request is independent with no memory of previous requests','The server uses cookies only','PHP sessions are disabled'],a:1,diff:'med',exp:'HTTP is stateless — each request stands alone. The server has no inherent memory of past requests; state must be maintained via sessions, cookies, or tokens.'},
+    {q:'What is the purpose of a REST API?',opts:['To replace databases','To provide a standardised architectural style for networked applications using HTTP','To compile server-side code','To manage CSS themes'],a:1,diff:'med',exp:'REST (Representational State Transfer) is an architectural style using HTTP verbs and resources to build scalable, interoperable web services.'},
+    {q:'In client-server architecture, which statement is TRUE?',opts:['The client stores all business logic','The server responds to client requests and manages data','The client directly accesses the database','The server renders all CSS'],a:1,diff:'easy',exp:'The server handles business logic, data persistence, and security. The client initiates requests and displays responses.'},
+    {q:'What HTTP status code range indicates a server-side error?',opts:['2xx','3xx','4xx','5xx'],a:3,diff:'easy',exp:'5xx codes (500, 502, 503…) indicate server-side errors. 4xx are client errors, 2xx are success, 3xx are redirections.'},
+    {q:'Which protocol is the encrypted version of HTTP?',opts:['FTP','SMTP','HTTPS','SSH'],a:2,diff:'easy',exp:'HTTPS (HTTP Secure) uses TLS/SSL to encrypt data in transit, protecting against eavesdropping.'},
+    {q:'What does "CRUD" stand for in database operations?',opts:['Create, Read, Update, Delete','Connect, Render, Upload, Download','Compile, Run, Upload, Deploy','Create, Render, Use, Drop'],a:0,diff:'easy',exp:'CRUD represents the four fundamental operations on persistent storage: Create, Read, Update, Delete.'},
+    {q:'A backend developer needs to prevent SQL injection. The BEST approach is:',opts:['Validating only numeric input','Using prepared statements with parameterised queries','Storing passwords in plain text','Disabling error reporting'],a:1,diff:'hard',exp:'Prepared statements separate SQL code from data, making injection impossible. User input is treated as data, never as executable SQL.'},
+    {q:'What is "middleware" in web development?',opts:['A database engine','Software that sits between the client request and the route handler to process it','A JavaScript bundler','A type of HTTP verb'],a:1,diff:'med',exp:'Middleware intercepts requests/responses to perform logging, authentication, validation, parsing, etc., before the final handler runs.'},
+    {q:'Which of the following correctly describes a "session" in web applications?',opts:['A permanent database record','Server-side storage linked to a client via a session ID cookie','A type of SQL query','A JavaScript object'],a:1,diff:'med',exp:'Sessions store user state server-side. The server creates a session ID stored in a client cookie; the server maps that ID to session data.'},
+    {q:'What does "scalability" mean for a backend system?',opts:['The ability to write more lines of code','The system\'s ability to handle increased load by adding resources','The number of CSS files used','The speed of the frontend'],a:1,diff:'med',exp:'Scalability means the system can handle growth — more users, requests, or data — by scaling up (bigger server) or out (more servers).'},
+    {q:'A PHP developer receives a POST request with JSON body. The correct way to read it is:',opts:['$_GET[\'data\']','$_POST[\'data\']','json_decode(file_get_contents(\'php://input\'), true)','$_REQUEST[\'json\']'],a:2,diff:'hard',exp:'php://input reads the raw POST body. json_decode converts JSON to a PHP array. $_POST only parses form-encoded or multipart data, not raw JSON.'},
+  ]},
+  { id:'s2', title:'Introduction to PHP', color:'#f97066', questions:[
+    {q:'PHP stands for:',opts:['Personal Home Page','PHP: Hypertext Preprocessor','Programmatic Hypertext Processing','Public HTML Protocol'],a:1,diff:'easy',exp:'PHP is a recursive acronym: PHP: Hypertext Preprocessor. It is a server-side scripting language embedded in HTML.'},
+    {q:'Which tag correctly opens a PHP block?',opts:['<script php>','<?php','<%','<php>'],a:1,diff:'easy',exp:'<?php opens a PHP block. The closing tag is ?>, though it is optional at the end of a file.'},
+    {q:'What is the output of: <?php echo "Hello" . " " . "World"; ?>',opts:['Hello World','Hello+World','HelloWorld','Error'],a:0,diff:'easy',exp:'The dot (.) operator concatenates strings in PHP. "Hello" . " " . "World" produces "Hello World".'},
+    {q:'Which function outputs data and returns the number of characters written?',opts:['print_r()','var_dump()','echo','print'],a:3,diff:'med',exp:'print() returns 1 on success and can be used as an expression. echo is a language construct that returns nothing. Both output data.'},
+    {q:'PHP files typically have which extension?',opts:['.html','.py','.php','.js'],a:2,diff:'easy',exp:'PHP files use the .php extension. The server processes PHP code server-side before sending HTML to the client.'},
+    {q:'What will var_dump(3.14) output?',opts:['int(3)','float(3.14)','double(3.14)','string(4) "3.14"'],a:2,diff:'med',exp:'PHP uses the term "double" internally for floating-point numbers. var_dump shows the type and value: float(3.14) or double(3.14) depending on version.'},
+    {q:'Which PHP function checks if a variable has been set and is not NULL?',opts:['empty()','is_null()','isset()','defined()'],a:2,diff:'easy',exp:'isset() returns true if the variable exists and is not NULL. empty() checks if a value is falsy. is_null() checks strictly for NULL.'},
+    {q:'What is the result of: <?php var_dump("5" == 5); ?>',opts:['bool(true)','bool(false)','int(5)','Error'],a:0,diff:'hard',exp:'PHP\'s loose comparison (==) coerces types. "5" is coerced to int 5, so "5" == 5 is true. Use === for strict comparison without coercion.'},
+    {q:'Which superglobal holds all GET and POST parameters combined?',opts:['$_GLOBAL','$_REQUEST','$_INPUT','$_ALL'],a:1,diff:'med',exp:'$_REQUEST merges $_GET, $_POST, and $_COOKIE. It\'s convenient but less secure; prefer specific superglobals like $_POST.'},
+    {q:'What does the spaceship operator <=> return when left < right?',opts:['0','1','-1','true'],a:2,diff:'hard',exp:'The spaceship operator returns -1 when left < right, 0 when equal, 1 when left > right. Useful for usort() callbacks.'},
+    {q:'Which function converts a string to an integer?',opts:['to_int()','intval()','int_cast()','parse_int()'],a:1,diff:'easy',exp:'intval() converts a variable to integer. You can also use (int) or (integer) type casting: (int)"42" returns 42.'},
+    {q:'What will <?php echo 10 % 3; ?> output?',opts:['3','3.33','1','0'],a:2,diff:'easy',exp:'The modulo operator % returns the remainder of division. 10 / 3 = 3 remainder 1, so 10 % 3 = 1.'},
+    {q:'PHP is:',opts:['Compiled and strongly typed','Interpreted and loosely typed','Compiled and loosely typed','Interpreted and strongly typed'],a:1,diff:'med',exp:'PHP is interpreted (executed line by line at runtime by the Zend Engine) and loosely/weakly typed (variables change type automatically).'},
+    {q:'Which PHP function returns the length of a string?',opts:['len()','count()','strlen()','size()'],a:2,diff:'easy',exp:'strlen() returns the number of bytes in a string. For multibyte/Unicode strings, use mb_strlen() instead.'},
+    {q:'What is the output of: <?php echo true ? "yes" : "no"; ?>',opts:['1','yes','true','no'],a:1,diff:'med',exp:'The ternary operator evaluates condition. true is truthy, so "yes" is returned and echoed.'},
+    {q:'Strict type declaration in PHP 7+ is enabled with:',opts:['use strict;','declare(strict_types=1);','strict_mode = true;','@strict'],a:1,diff:'hard',exp:'declare(strict_types=1) at the top of a file enables strict mode, causing type coercion to throw TypeError instead of silently converting.'},
+    {q:'Which of the following is a valid PHP comment?',opts:['<!-- comment -->','# comment','// comment','Both B and C'],a:3,diff:'easy',exp:'PHP supports // and # for single-line comments, and /* */ for multi-line. <!-- --> is HTML comment syntax, not PHP.'},
+    {q:'What does the null coalescing operator ?? do?',opts:['Checks if two values are null','Returns the left operand if not null/undefined, else the right','Casts a value to null','Assigns null to a variable'],a:1,diff:'med',exp:'$x = $a ?? $b; returns $a if it exists and is not null, otherwise $b. Introduced in PHP 7. Equivalent to isset($a) ? $a : $b.'},
+    {q:'What is the output of: <?php echo 2 ** 8; ?>',opts:['16','256','128','Error'],a:1,diff:'med',exp:'** is the exponentiation operator (PHP 5.6+). 2 ** 8 = 256.'},
+    {q:'Which function terminates script execution immediately?',opts:['stop()','halt()','exit() or die()','terminate()'],a:2,diff:'easy',exp:'exit() and die() are equivalent — both terminate the PHP script. die() can take a status message: die("Error occurred").'},
+  ]},
+  { id:'s3', title:'Variable Scope & Constants', color:'#34d399', questions:[
+    {q:'What is the default scope of a variable declared inside a PHP function?',opts:['Global','Local to the function','Static','Super-global'],a:1,diff:'easy',exp:'Variables declared inside a function are local — they only exist within that function\'s execution context.'},
+    {q:'How do you access a global variable inside a function?',opts:['Using $global prefix','Using the global keyword','It is automatically available','Using $_GLOBAL superglobal'],a:1,diff:'easy',exp:'You must declare "global $varName;" inside the function to access and modify a global variable.'},
+    {q:'What keyword preserves a local variable\'s value between function calls?',opts:['global','const','static','persistent'],a:2,diff:'med',exp:'static variables retain their value between calls but remain locally scoped. They are initialized only once.'},
+    {q:'What will this output?\n<?php\n$x = 10;\nfunction test() { echo $x; }\ntest();',opts:['10','Undefined variable error/notice','null','0'],a:1,diff:'med',exp:'$x is not in scope inside test(). PHP raises a notice and $x is undefined inside the function without a global declaration.'},
+    {q:'Which superglobal is accessible everywhere without declaring global?',opts:['$_local','$_vars','$_GLOBALS','$_ENV only'],a:2,diff:'easy',exp:'$_GLOBALS is a superglobal associative array of all global variables. Superglobals are accessible in any scope without the global keyword.'},
+    {q:'How is a constant defined in PHP (procedural style)?',opts:['$PI = 3.14;','let PI = 3.14;','define("PI", 3.14);','constant PI = 3.14;'],a:2,diff:'easy',exp:'define("NAME", value) creates a constant. Constants are case-sensitive by default, available globally, and cannot be changed.'},
+    {q:'How is a constant defined using the const keyword?',opts:['const PI = 3.14;','define const PI = 3.14;','const $PI = 3.14;','constant("PI", 3.14)'],a:0,diff:'easy',exp:'const PI = 3.14; defines a constant at compile time. Note: no $ prefix. const can also define class constants.'},
+    {q:'What is the key difference between define() and const?',opts:['define() is faster','const is evaluated at compile time; define() at runtime','There is no difference','const can only define integers'],a:1,diff:'hard',exp:'const is a compile-time construct — it cannot be used inside if blocks or functions. define() is runtime and can be conditionally defined.'},
+    {q:'What will this output?\n<?php\nconst MAX = 100;\necho MAX;',opts:['100','$MAX','Error','MAX'],a:0,diff:'easy',exp:'Constants are accessed without $ prefix. echo MAX outputs the constant\'s value: 100.'},
+    {q:'Which of the following is a PHP magic constant?',opts:['__DIR__','__ROOT__','__BASE__','__NAME__'],a:0,diff:'med',exp:'PHP magic constants include __DIR__, __FILE__, __LINE__, __FUNCTION__, __CLASS__, __METHOD__, __NAMESPACE__. They change based on context.'},
+    {q:'What does __FILE__ return?',opts:['The current function name','The full path and filename of the current file','The class name','The namespace'],a:1,diff:'med',exp:'__FILE__ is a magic constant containing the full path to the currently executing PHP file, resolved to the real path.'},
+    {q:'A static variable inside a function:',opts:['Is accessible globally','Retains its value across calls but is locally scoped','Is shared between all instances of a class','Is equivalent to a constant'],a:1,diff:'med',exp:'static $var = 0; initializes once; on subsequent calls, the variable keeps its last value but cannot be accessed outside the function.'},
+    {q:'What happens if you try to reassign a constant?',opts:['The value updates silently','PHP throws a fatal error (in strict mode) or a notice','The constant becomes a variable','PHP ignores the assignment'],a:1,diff:'med',exp:'Attempting to redefine a constant raises a notice in older PHP and is an error in strict mode. The original value is preserved.'},
+    {q:'PHP\'s $GLOBALS superglobal:',opts:['Only stores database connections','Is an array of all global-scope variables keyed by name','Is the same as $_SERVER','Only stores session variables'],a:1,diff:'med',exp:'$GLOBALS[\'varName\'] accesses the global variable $varName from within any scope, as an alternative to the global keyword.'},
+    {q:'What is the scope of a constant defined with define()?',opts:['Only in the current function','Only in the current file','Global across the entire script unless namespaced','Only in classes'],a:2,diff:'med',exp:'Constants defined with define() are globally accessible. When using namespaces, fully-qualified constant names are needed outside the namespace.'},
+    {q:'Consider: function counter() { static $n = 0; $n++; return $n; } What do three consecutive calls to counter() return?',opts:['0, 0, 0','1, 1, 1','1, 2, 3','0, 1, 2'],a:2,diff:'hard',exp:'$n = 0 runs only once. Each call increments and returns: 1, 2, 3. Static variables persist their value between calls.'},
+    {q:'Which of these correctly accesses a global variable inside a function WITHOUT the global keyword?',opts:['$_GLOBALS["x"]','$GLOBALS["x"]','global["x"]','$_GLOBAL["x"]'],a:1,diff:'hard',exp:'$GLOBALS is the superglobal (no underscore after $). $GLOBALS["x"] accesses global $x without declaring it global inside the function.'},
+    {q:'Predefined constants like PHP_INT_MAX are:',opts:['User-defined','Set at compile time and reflect PHP build configuration','Only available in PHP 8','Mutable during runtime'],a:1,diff:'med',exp:'PHP_INT_MAX, PHP_EOL, PHP_VERSION, etc., are predefined constants set during PHP compilation based on the platform.'},
+    {q:'What is the output?\n<?php\ndefine("A", 5);\nfunction f() { return A * 2; }\necho f();',opts:['10','Error','A*2','5'],a:0,diff:'med',exp:'Constants are global and accessible inside functions without declaration. A is 5, so A * 2 = 10.'},
+    {q:'Variable variables in PHP ($$var) allow:',opts:['Creating arrays dynamically','Using the VALUE of a variable as the NAME of another variable','Defining constants','Accessing superglobals'],a:1,diff:'hard',exp:'$name = "hello"; $$name = "world"; creates $hello = "world". echo $hello; outputs "world". Powerful but can reduce readability.'},
+  ]},
+  { id:'s4', title:'Coding Structure & Syntax', color:'#fbbf24', questions:[
+    {q:'Which symbol ends a PHP statement?',opts:[':','.','semicolon (;)','newline'],a:2,diff:'easy',exp:'PHP statements end with a semicolon. Missing semicolons cause parse errors (T_... unexpected token errors).'},
+    {q:'What does the concatenation assignment operator .= do?',opts:['Multiplies and assigns','Appends a string to a variable','Defines a constant','Creates a new string variable'],a:1,diff:'easy',exp:'$str .= "more"; is equivalent to $str = $str . "more"; — it appends "more" to the existing value of $str.'},
+    {q:'Which PHP function is called automatically when an object is created?',opts:['__destruct()','__init()','__construct()','__start()'],a:2,diff:'easy',exp:'__construct() is the constructor magic method, called automatically when new ClassName() is invoked.'},
+    {q:'What is the output of: <?php echo "5" + 3; ?>',opts:['53','Error','8','5+3'],a:2,diff:'med',exp:'PHP coerces "5" to int 5 when used with +. 5 + 3 = 8. The + operator is arithmetic; use . for concatenation.'},
+    {q:'Which statement about PHP namespaces is TRUE?',opts:['They replace classes','They organize code and avoid name collisions','They only apply to constants','They require PHP 8+'],a:1,diff:'med',exp:'Namespaces prevent name conflicts between libraries. Declared with: namespace MyApp\\Controllers; and used with use or fully-qualified names.'},
+    {q:'What does the "use" keyword do at the top of a PHP file?',opts:['Imports a namespace or class alias','Declares a global variable','Includes another PHP file','Enables strict mode'],a:0,diff:'med',exp:'use App\\Models\\User; imports User into the current namespace. use ... as Alias; creates an alias for long names.'},
+    {q:'Heredoc syntax in PHP:',opts:['Creates an array','Defines a multi-line string with variable interpolation','Only works inside classes','Is deprecated in PHP 8'],a:1,diff:'med',exp:'Heredoc (<<<EOT ... EOT;) creates multi-line strings. Variables are interpolated. Nowdoc (<<<\'EOT\') does not interpolate variables.'},
+    {q:'What is the difference between include and require?',opts:['require is faster','include produces a fatal error on failure; require produces a warning','require produces a fatal error on failure; include produces a warning','They are identical'],a:2,diff:'med',exp:'require() produces a fatal error (E_COMPILE_ERROR) if the file is not found, stopping execution. include() produces a warning and continues.'},
+    {q:'What does include_once do differently from include?',opts:['It caches the file indefinitely','It only includes the file if it has not already been included in the same script','It requires a return value','It throws exceptions on failure'],a:1,diff:'med',exp:'include_once prevents duplicate inclusion — useful when multiple files might include the same dependency (e.g., a config file).'},
+    {q:'Which type-hinting declaration enforces that a function must return an integer?',opts:['function f(): int {}','function int f() {}','function f() returns int {}','@return int function f() {}'],a:0,diff:'med',exp:'Return type declarations use the colon syntax: function name(): returnType {}. Introduced in PHP 7.0.'},
+    {q:'What is the output?\n<?php\n$a = "2 apples";\necho $a + 3;',opts:['Error','5','23','2 apples3'],a:1,diff:'hard',exp:'PHP extracts the leading numeric value from "2 apples" (=2) and adds 3. Result: 5. A notice may be raised in PHP 8.'},
+    {q:'What does the spread operator ... do in PHP function arguments?',opts:['Creates a rest parameter collecting extra args into an array','Spreads an array into individual arguments','Both A and B are correct','Neither; ... is not valid PHP'],a:2,diff:'hard',exp:'In function definitions, ...args collects variadic arguments into an array (rest). In calls, ...$array unpacks an array into arguments (spread). PHP 5.6+.'},
+    {q:'Match expression vs switch — which statement is TRUE?',opts:['match uses loose comparison','match is an expression that returns a value; switch is a statement','switch returns values; match does not','They are identical'],a:1,diff:'hard',exp:'match (PHP 8.0) uses strict comparison (===), returns a value, throws UnhandledMatchError if no arm matches. switch uses loose comparison and is a statement.'},
+    {q:'What is a trait in PHP?',opts:['A type of exception','A mechanism for code reuse in single-inheritance languages','A type of array','A constant container'],a:1,diff:'med',exp:'Traits (PHP 5.4+) allow horizontal code reuse — methods defined in a trait can be "mixed into" any class, overcoming single-inheritance limits.'},
+    {q:'What is the output of: <?php echo PHP_EOL === "\\n" ? "yes":"no"; ?> on Linux?',opts:['yes','no','Error','null'],a:0,diff:'hard',exp:'PHP_EOL is the platform newline character. On Linux/Mac it\'s "\\n"; on Windows "\\r\\n". On Linux, the comparison is true, so "yes" is echoed.'},
+    {q:'Which arrow function syntax is valid in PHP 7.4+?',opts:['fn($x) => $x * 2','arrow($x) { return $x * 2; }','lambda $x: $x * 2','($x) -> $x * 2'],a:0,diff:'med',exp:'Arrow functions (fn) capture outer scope variables automatically (no use keyword needed): $double = fn($x) => $x * 2;'},
+    {q:'What does the final keyword prevent on a class?',opts:['Instantiation','Extension by a subclass','Property access','Method overloading'],a:1,diff:'med',exp:'final class Foo {} prevents other classes from extending Foo. final on a method prevents child classes from overriding it.'},
+    {q:'Type juggling in PHP refers to:',opts:['Manually casting types','PHP automatically converting types based on context','Using multiple data types in one variable','Declaring union types'],a:1,diff:'med',exp:'Type juggling is PHP\'s automatic type conversion. For example, "0" is falsy, "1" is truthy. This can cause subtle bugs in comparisons.'},
+    {q:'What does the abstract keyword do on a class?',opts:['Prevents instantiation and may define abstract methods subclasses must implement','Makes all methods private','Marks the class as deprecated','Creates a singleton'],a:0,diff:'med',exp:'abstract classes cannot be instantiated directly. They may contain abstract methods (no body) that concrete subclasses must implement.'},
+    {q:'Which statement about PHP interfaces is CORRECT?',opts:['Interfaces can contain method implementations','A class can implement multiple interfaces','Interfaces support private methods','Interfaces extend classes'],a:1,diff:'med',exp:'PHP supports multiple interface implementation: class Foo implements Bar, Baz {}. Interfaces define contracts — method signatures without bodies (except PHP 8 constants).'},
+  ]},
+  { id:'s5', title:'PHP Data Input', color:'#60a5fa', questions:[
+    {q:'Which superglobal stores data sent via HTTP GET?',opts:['$_POST','$_GET','$_INPUT','$_URL'],a:1,diff:'easy',exp:'$_GET contains query string parameters from the URL: example.com/page?name=John sends $_GET["name"] = "John".'},
+    {q:'Which superglobal stores data sent via HTTP POST?',opts:['$_GET','$_POST','$_REQUEST','$_FORM'],a:1,diff:'easy',exp:'$_POST contains data from form submissions with method="post" or raw POST requests with matching Content-Type.'},
+    {q:'Which PHP function sanitizes a string by removing HTML/PHP tags?',opts:['htmlspecialchars()','strip_tags()','addslashes()','sanitize()'],a:1,diff:'med',exp:'strip_tags() removes HTML and PHP tags. htmlspecialchars() converts special chars to HTML entities — both are used for output safety.'},
+    {q:'What does htmlspecialchars() protect against?',opts:['SQL injection','Cross-Site Scripting (XSS)','CSRF attacks','File inclusion attacks'],a:1,diff:'med',exp:'htmlspecialchars() converts <, >, &, ", \' to HTML entities, preventing injected HTML/JavaScript from executing in the browser (XSS).'},
+    {q:'To validate an email address in PHP, the correct filter is:',opts:['FILTER_VALIDATE_URL','FILTER_SANITIZE_EMAIL','FILTER_VALIDATE_EMAIL','FILTER_EMAIL_CHECK'],a:2,diff:'med',exp:'filter_var($email, FILTER_VALIDATE_EMAIL) returns the email if valid, or false if not. Always validate before using input.'},
+    {q:'What does filter_var($input, FILTER_SANITIZE_NUMBER_INT) do?',opts:['Validates if $input is an integer','Removes all characters except digits and +/-','Converts $input to float','Adds database escaping'],a:1,diff:'med',exp:'FILTER_SANITIZE_NUMBER_INT strips all characters except digits and the +/- signs, leaving a string representation of a number.'},
+    {q:'Which $_SERVER variable contains the client\'s IP address?',opts:['$_SERVER["CLIENT_IP"]','$_SERVER["REMOTE_ADDR"]','$_SERVER["HTTP_HOST"]','$_SERVER["SERVER_IP"]'],a:1,diff:'med',exp:'$_SERVER["REMOTE_ADDR"] contains the IP address of the client making the request. Note: proxies may affect this value.'},
+    {q:'What is the correct way to check if a form was submitted via POST?',opts:['if ($_POST != null)','if ($_SERVER["REQUEST_METHOD"] === "POST")','if (isset($_SUBMIT))','if ($POST)'],a:1,diff:'med',exp:'Checking $_SERVER["REQUEST_METHOD"] === "POST" is the standard approach. It confirms the HTTP method regardless of what data was sent.'},
+    {q:'How does PHP handle file uploads from HTML forms?',opts:['Via $_GET superglobal','Via $_FILES superglobal','Via $_POST["file"]','Via file_get_contents()'],a:1,diff:'med',exp:'$_FILES contains the uploaded file info: name, type, tmp_name, error, size. The form must use enctype="multipart/form-data".'},
+    {q:'What is the risk of using extract($_POST) without validation?',opts:['It slows down the server','It can overwrite existing variables (variable injection vulnerability)','It only works with GET','It always throws an error'],a:1,diff:'hard',exp:'extract() creates variables from array keys. If $_POST contains "admin=1", it creates $admin=1, potentially overwriting security flags — a serious vulnerability.'},
+    {q:'Which function escapes special characters in a string for use in a MySQL query (deprecated approach)?',opts:['addslashes()','mysql_real_escape_string()','htmlspecialchars()','urlencode()'],a:1,diff:'hard',exp:'mysql_real_escape_string() was the old way; the mysql_* extension is removed in PHP 7+. Use PDO prepared statements or MySQLi instead.'},
+    {q:'What does trim() do to input?',opts:['Removes HTML tags','Removes leading and trailing whitespace','Converts to lowercase','Validates email format'],a:1,diff:'easy',exp:'trim() removes whitespace (spaces, tabs, newlines) from both ends of a string. ltrim() and rtrim() trim only left or right respectively.'},
+    {q:'What is the safest way to accept and use user input in a database query?',opts:['Use $_POST directly in the SQL string','Use PDO with prepared statements and bound parameters','Sanitize with addslashes() first','Use mysql_escape_string()'],a:1,diff:'hard',exp:'PDO prepared statements with bound parameters: $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?"); $stmt->execute([$id]); — completely prevents SQL injection.'},
+    {q:'The PHP function json_decode() returns _____ when JSON is invalid.',opts:['false','null','0','empty string'],a:1,diff:'med',exp:'json_decode() returns null on failure. Check json_last_error() === JSON_ERROR_NONE to verify the decode succeeded.'},
+    {q:'To read raw HTTP request body (e.g., JSON API input):',opts:['$_POST["raw"]','$_INPUT["body"]','file_get_contents("php://input")','$_SERVER["BODY"]'],a:2,diff:'hard',exp:'php://input is a read-only stream for the raw POST body. Essential for REST APIs that receive JSON: json_decode(file_get_contents("php://input"), true).'},
+    {q:'What does $_SERVER["HTTP_USER_AGENT"] contain?',opts:['Server software name','Client browser/agent string','Request URI','HTTP method'],a:1,diff:'easy',exp:'HTTP_USER_AGENT is the User-Agent header string sent by the client browser, e.g., "Mozilla/5.0 ... Chrome/..."'},
+    {q:'Which function URL-encodes a string for safe use in a query string?',opts:['urlencode()','htmlspecialchars()','base64_encode()','addslashes()'],a:0,diff:'med',exp:'urlencode() converts spaces to + and special characters to %XX hex codes, making strings safe for URL query strings.'},
+    {q:'In a PHP form, if a checkbox is NOT checked:',opts:['$_POST["checkbox"] is false','$_POST["checkbox"] is ""','The key is absent from $_POST entirely','$_POST["checkbox"] is "off"'],a:2,diff:'hard',exp:'Unchecked checkboxes send no data. The key does not appear in $_POST. Always use isset($_POST["checkbox"]) before accessing it.'},
+    {q:'What does FILTER_VALIDATE_INT return when the input is "42"?',opts:['true','42 (as integer)','false','"42" (as string)'],a:1,diff:'hard',exp:'FILTER_VALIDATE_INT returns the integer value 42 if valid, or false if invalid. Unlike VALIDATE_EMAIL which returns the string, INT returns the cast value.'},
+    {q:'Which PHP function converts an array to a JSON string?',opts:['array_to_json()','json_convert()','json_encode()','serialize()'],a:2,diff:'easy',exp:'json_encode($array) converts a PHP array (or object) to a JSON string. json_decode() does the reverse.'},
+  ]},
+  { id:'s6', title:'Control Structures', color:'#e879f9', questions:[
+    {q:'Which PHP control structure tests multiple conditions and executes the first match?',opts:['if','for','switch','while'],a:2,diff:'easy',exp:'switch tests one expression against multiple case values, executing the matching block. It\'s more readable than long if-elseif chains.'},
+    {q:'What is the output of:\n<?php\nfor ($i=0; $i<3; $i++) echo $i;',opts:['123','012','0 1 2','Error'],a:1,diff:'easy',exp:'The loop starts at 0, runs while i<3, increments after each iteration. It echoes 0, 1, 2 consecutively: "012".'},
+    {q:'Which loop executes its body AT LEAST once?',opts:['for','while','do...while','foreach'],a:2,diff:'easy',exp:'do...while evaluates the condition AFTER executing the body, guaranteeing at least one execution regardless of the condition.'},
+    {q:'What does the break 2; statement do inside nested loops?',opts:['Breaks the inner loop only','Breaks the outer loop only','Breaks two levels of nested loops','Is invalid PHP'],a:2,diff:'hard',exp:'break N; exits N levels of nested loop/switch structures. break 2; exits both the current loop and the one containing it.'},
+    {q:'What is the purpose of continue in a loop?',opts:['Exits the loop','Skips the rest of the current iteration and goes to the next','Pauses execution','Restarts the loop from the beginning'],a:1,diff:'easy',exp:'continue skips remaining code in the current iteration and jumps to the loop\'s next cycle. continue 2; skips in the enclosing loop.'},
+    {q:'Which of the following correctly uses a foreach loop on an associative array?',opts:['foreach ($arr as $key => $val)','for ($arr as $key : $val)','foreach $arr as ($key, $val)','loop ($arr, $key, $val)'],a:0,diff:'easy',exp:'foreach ($array as $key => $value) iterates associative arrays. foreach ($array as $value) works for indexed arrays without keys.'},
+    {q:'What is the output?\n<?php\n$i = 1;\nwhile ($i <= 3) {\n  if ($i == 2) { $i++; continue; }\n  echo $i++;\n}',opts:['123','13','12','1 2 3'],a:1,diff:'hard',exp:'i=1: echoes 1, i becomes 2. i=2: continue (no echo), i becomes 3. i=3: echoes 3, i becomes 4. Loop ends. Output: "13".'},
+    {q:'What happens if a switch case has no break statement?',opts:['PHP throws an error','Execution falls through to the next case','The switch exits','The default runs instead'],a:1,diff:'med',exp:'Without break, execution "falls through" to the next case statement, running its code regardless of whether it matches. This can be intentional or a bug.'},
+    {q:'The match expression in PHP 8 differs from switch because it:',opts:['Allows multiple conditions','Uses strict (===) comparison and is an expression','Supports break and continue','Requires a default case'],a:1,diff:'hard',exp:'match uses strict comparison (no type coercion), is an expression (returns a value), throws UnhandledMatchError if unmatched, and each arm is a comma-separated list.'},
+    {q:'What is the output of:\n<?php\nfor ($i=10; $i>0; $i-=3) echo "$i ";',opts:['10 7 4 1','10 7 4','10 7 4 1 -2','10 7 4 1 '],a:0,diff:'med',exp:'Starting at 10, subtracting 3 each time: 10, 7, 4, 1. When i becomes -2 (<= 0), loop ends. Output: "10 7 4 1 ".'},
+    {q:'Which statement is TRUE about the PHP ternary operator?',opts:['It requires an else clause','It cannot be nested','It evaluates to the left side if the condition is true','It only works with boolean conditions'],a:2,diff:'med',exp:'$x = condition ? "true_value" : "false_value"; — returns left expression if condition is truthy, right if falsy.'},
+    {q:'What does the null safe operator ?-> do?',opts:['Throws if null','Returns null without error if the object is null instead of calling the method','Casts null to false','Is an assignment operator'],a:1,diff:'hard',exp:'$result = $obj?->getUser()?->getName(); — if $obj is null, evaluation short-circuits to null without a fatal error. PHP 8.0+.'},
+    {q:'When does an if-elseif-else chain execute the else block?',opts:['Always','When all preceding conditions are false','When the first condition is true','When any condition is true'],a:1,diff:'easy',exp:'else executes only when all if and elseif conditions evaluated to false.'},
+    {q:'What is the output?\n<?php\n$x = 0;\ndo { echo $x; $x++; } while ($x < 0);',opts:['Nothing','0','Error','Infinite loop'],a:1,diff:'med',exp:'do-while executes the body first (echoing 0, incrementing to 1), then checks: 1 < 0 is false. Loop ends. Output: "0".'},
+    {q:'Which is the correct alternative syntax for a PHP if block in a template?',opts:['if ($x) : ... endif;','if ($x) { } end;','if ($x) then ... fi;','if ($x) [ ... ]'],a:0,diff:'med',exp:'PHP supports alternative syntax with colon and closing keywords: if(): ... elseif(): ... else: ... endif; — useful in HTML templates.'},
+    {q:'What is the purpose of the default case in switch?',opts:['It always executes first','It runs when no other case matches','It is required','It replaces break'],a:1,diff:'easy',exp:'default acts as the catch-all case, running when no case label matches the switch expression. It is optional.'},
+    {q:'In PHP, which values are considered FALSY? (select the oddity — which is NOT falsy)',opts:['"0"','0','false','"false"'],a:3,diff:'hard',exp:'"false" (the string "false") is TRUTHY in PHP! Only "", "0", 0, 0.0, null, false, [], and "0" are falsy. Non-empty strings (even "false") are truthy.'},
+    {q:'What does list() or [] assignment do in a foreach?',opts:['Creates an array','Unpacks nested arrays into variables per iteration','Defines a list constant','Filters array values'],a:1,diff:'hard',exp:'foreach ($matrix as [$x, $y]) or foreach ($matrix as list($x, $y)) unpacks each sub-array into variables on each iteration.'},
+    {q:'What is the output?\n<?php\nswitch(true) {\n  case (5 > 3): echo "A"; break;\n  case (2 > 1): echo "B"; break;\n}',opts:['AB','A','B','Error'],a:1,diff:'hard',exp:'switch(true) compares each case against true. 5>3 is true, matching the first case. "A" is echoed and break exits. "B" never runs.'},
+    {q:'The PHP goto statement:',opts:['Does not exist in PHP','Jumps to a labelled location within the same function/file (no jumping into loops)','Works across files','Is the same as break'],a:1,diff:'hard',exp:'PHP supports goto label; and label: markers. Restrictions: cannot jump into a loop, switch, or function from outside. Rarely used in practice.'},
+  ]},
+  { id:'s7', title:'Arrays & Functions', color:'#fb923c', questions:[
+    {q:'Which function adds an element to the END of an array?',opts:['array_unshift()','array_push() or $arr[]','array_append()','push()'],a:1,diff:'easy',exp:'array_push($arr, $val) or the shorthand $arr[] = $val; both append to the end. array_unshift() prepends to the beginning.'},
+    {q:'What does array_merge() do when two arrays have the same string key?',opts:['Throws an error','The second array\'s value overwrites the first','The values are combined into a sub-array','The first value is kept'],a:1,diff:'med',exp:'array_merge() with string keys: later values overwrite earlier ones. For numeric keys, it re-indexes and keeps all values.'},
+    {q:'Which function sorts an associative array by VALUE, preserving keys?',opts:['sort()','asort()','ksort()','usort()'],a:1,diff:'med',exp:'asort() sorts by value while maintaining key-value associations. sort() re-indexes. ksort() sorts by key. arsort() sorts by value descending.'},
+    {q:'What is the output of:\n<?php\n$a = [1,2,3];\necho count($a);',opts:['3','[1,2,3]','1','Error'],a:0,diff:'easy',exp:'count() returns the number of elements in an array. [1,2,3] has 3 elements.'},
+    {q:'What does array_map() do?',opts:['Filters array elements','Applies a callback to each element and returns a new array','Sorts the array','Searches the array'],a:1,diff:'med',exp:'array_map($callback, $array) applies the callback to every element and returns the results as a new array, without modifying the original.'},
+    {q:'Which function removes duplicate values from an array?',opts:['array_diff()','array_unique()','array_filter()','array_flip()'],a:1,diff:'easy',exp:'array_unique() returns a new array with duplicate values removed, preserving the first occurrence and its original key.'},
+    {q:'What does the & in function argument definition (function f(&$x)) mean?',opts:['Pass by value','Pass by reference','Optional parameter','Variadic parameter'],a:1,diff:'med',exp:'& passes the argument by reference. Changes to $x inside f() modify the original variable, not a copy.'},
+    {q:'What is the output?\n<?php\nfunction double($n) { return $n * 2; }\n$result = array_map("double", [1,2,3]);\nprint_r($result);',opts:['[1,2,3]','[2,4,6]','Array ( [0]=>2 [1]=>4 [2]=>6 )','Error'],a:2,diff:'med',exp:'array_map applies double() to each element. Results: 2,4,6. print_r shows: Array ( [0] => 2 [1] => 4 [2] => 6 ).'},
+    {q:'array_filter() without a callback removes:',opts:['Keys','Duplicate values','Falsy values (empty string, 0, null, false, [])','Only null values'],a:2,diff:'med',exp:'Without a callback, array_filter() removes elements that evaluate to false: 0, "", null, false, [], "0". It preserves keys.'},
+    {q:'Which function searches an array for a value and returns its KEY?',opts:['in_array()','array_search()','array_find()','array_key_exists()'],a:1,diff:'med',exp:'array_search($value, $array) returns the key of the first match, or false if not found. in_array() only returns true/false.'},
+    {q:'What is a closure in PHP?',opts:['A type of array','An anonymous function that can capture outer-scope variables via use','A class with no methods','A deprecated feature'],a:1,diff:'med',exp:'Closures are anonymous functions: $fn = function($x) use ($factor) { return $x * $factor; }; They capture variables explicitly with use.'},
+    {q:'What does array_reduce() do?',opts:['Removes elements','Iteratively reduces array to a single value using a callback','Splits an array','Converts array to string'],a:1,diff:'med',exp:'array_reduce($arr, $callback, $initial) applies the callback cumulatively. $callback receives (carry, item). Good for sums, products, custom aggregations.'},
+    {q:'Which is the correct way to define a function with a DEFAULT parameter?',opts:['function f($x=10)','function f($x default 10)','function f($x|10)','function f($x??10)'],a:0,diff:'easy',exp:'function greet($name = "World") { echo "Hello, $name!"; } — default values must be constant expressions.'},
+    {q:'What does the splat operator do in function calls?',opts:['Creates variadic params','Spreads an array into individual arguments: f(...$args)','Merges two arrays','Returns an iterator'],a:1,diff:'hard',exp:'...$arr in a function CALL unpacks the array into separate arguments. function f($a,$b,$c) called as f(...[1,2,3]) works.'},
+    {q:'Which function reverses the order of an array\'s elements?',opts:['array_flip()','array_reverse()','rsort()','krsort()'],a:1,diff:'easy',exp:'array_reverse($arr) returns a new array with elements in reverse order. array_reverse($arr, true) preserves keys.'},
+    {q:'Recursive functions in PHP require:',opts:['A special keyword','A base case to prevent infinite recursion','External libraries','PHP 8+'],a:1,diff:'med',exp:'Every recursive function must have a base case that stops recursion. Without it, you get infinite recursion and a stack overflow / fatal error.'},
+    {q:'What does array_combine($keys, $values) do?',opts:['Merges two arrays by appending','Creates an associative array from separate keys and values arrays','Sorts and combines','Filters combined arrays'],a:1,diff:'med',exp:'array_combine($keys, $values) creates a new associative array. Keys and values must have the same count or a warning is raised.'},
+    {q:'In PHP, what is a "variadic function"?',opts:['A function that returns multiple values','A function that accepts a variable number of arguments via ...','A function inside a class','An anonymous function'],a:1,diff:'med',exp:'function sum(...$nums) { return array_sum($nums); } — ...$nums collects all extra arguments into an array. PHP 5.6+.'},
+    {q:'What is the output?\n<?php\n$a=[3,1,4,1,5];\nsort($a);\necho $a[0];',opts:['3','1','4','5'],a:1,diff:'med',exp:'sort() sorts in ascending order in-place: [1,1,3,4,5]. $a[0] is 1.'},
+    {q:'Which of the following correctly uses array_walk() to multiply each element by 2?',opts:['array_walk($a, fn(&$v) => $v *= 2);','array_walk($a, fn($v) => $v * 2);','array_map($a, fn($v) => $v * 2);','array_transform($a, function($v){return $v*2;})'],a:0,diff:'hard',exp:'array_walk passes each value by reference to the callback. The & before $v is essential; without it, the original array is unchanged.'},
+  ]}
+];
+
+// Flatten questions with global index
+let allQuestions = [];
+SECTIONS.forEach((sec, si) => {
+  sec.questions.forEach((q, qi) => {
+    allQuestions.push({...q, sectionIdx: si, localIdx: qi, globalIdx: allQuestions.length});
+  });
+});
+
+let userAnswers = {}; // globalIdx -> option index
+let mode = 'quiz'; // 'quiz' | 'key'
+let graded = false;
+
+function buildUI() {
+  buildSectionNav();
+  buildQuestions();
+}
+
+function buildSectionNav() {
+  const nav = document.getElementById('sec-nav');
+  nav.innerHTML = '';
+  SECTIONS.forEach((sec, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'sec-tab' + (i===0?' active':'');
+    btn.textContent = `${i+1}. ${sec.title}`;
+    btn.onclick = () => showSection(i);
+    nav.appendChild(btn);
+  });
+}
+
+function buildQuestions() {
+  const main = document.getElementById('main-content');
+  main.innerHTML = '';
+  SECTIONS.forEach((sec, si) => {
+    const panel = document.createElement('div');
+    panel.className = 'section-panel' + (si===0?' active':'');
+    panel.id = 'panel-' + si;
+
+    const hdr = document.createElement('div');
+    hdr.className = 'section-header';
+    const qStart = allQuestions.filter(q=>q.sectionIdx < si).length + 1;
+    const qEnd = qStart + sec.questions.length - 1;
+    hdr.innerHTML = `<div class="section-num" style="background:${sec.color}">${si+1}</div>
+      <div class="section-title">${sec.title}</div>
+      <div class="section-count">Q${qStart}–Q${qEnd}</div>`;
+    panel.appendChild(hdr);
+
+    sec.questions.forEach((q, qi) => {
+      const globalIdx = allQuestions.findIndex(aq => aq.sectionIdx===si && aq.localIdx===qi);
+      panel.appendChild(buildCard(q, globalIdx, qStart + qi - 1));
+    });
+
+    main.appendChild(panel);
+  });
+}
+
+function buildCard(q, globalIdx, displayNum) {
+  const card = document.createElement('div');
+  card.className = 'question-card';
+  card.id = 'card-' + globalIdx;
+  card.style.setProperty('--i', globalIdx % 20);
+
+  const diffClass = q.diff === 'easy' ? 'diff-easy' : q.diff === 'med' ? 'diff-med' : 'diff-hard';
+  const diffLabel = q.diff === 'easy' ? 'EASY' : q.diff === 'med' ? 'MEDIUM' : 'HARD';
+
+  // Format question text with code blocks
+  let qText = q.q.replace(/`([^`]+)`/g, '<code>$1</code>');
+  let qHtml = '';
+  if (q.q.includes('\n')) {
+    const parts = q.q.split('\n');
+    const firstLine = parts[0].replace(/`([^`]+)`/g, '<code>$1</code>');
+    const codeLines = parts.slice(1).join('\n');
+    qHtml = `${firstLine}<div class="code-block">${escHtml(codeLines)}</div>`;
+  } else {
+    qHtml = qText;
+  }
+
+  card.innerHTML = `
+    <div class="q-header">
+      <span class="q-num">Q${displayNum + 1}</span>
+      <span class="q-text">${qHtml}</span>
+      <span class="diff ${diffClass}">${diffLabel}</span>
+    </div>
+    <div class="options" id="opts-${globalIdx}">
+      ${q.opts.map((opt, oi) => `
+        <div class="option" id="opt-${globalIdx}-${oi}" onclick="selectOption(${globalIdx}, ${oi})">
+          <span class="opt-letter">${'ABCD'[oi]}</span>
+          <span>${opt}</span>
+        </div>
+      `).join('')}
+    </div>
+    <div class="explanation" id="exp-${globalIdx}">
+      <strong>✓ Explanation:</strong> ${q.exp}
+    </div>
+  `;
+  return card;
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function showSection(idx) {
+  document.querySelectorAll('.section-panel').forEach((p,i) => {
+    p.classList.toggle('active', i===idx);
+  });
+  document.querySelectorAll('.sec-tab').forEach((t,i) => {
+    t.classList.toggle('active', i===idx);
+  });
+}
+
+function selectOption(globalIdx, optIdx) {
+  if (graded) return;
+  userAnswers[globalIdx] = optIdx;
+
+  // Update UI
+  const opts = document.getElementById('opts-' + globalIdx);
+  opts.querySelectorAll('.option').forEach((o, i) => {
+    o.classList.toggle('selected', i === optIdx);
+  });
+
+  const card = document.getElementById('card-' + globalIdx);
+  card.classList.add('answered');
+
+  updateProgress();
+}
+
+function updateProgress() {
+  const answered = Object.keys(userAnswers).length;
+  const pct = (answered / 150 * 100).toFixed(1);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = `${answered} / 150 answered`;
+  document.getElementById('answered-count').textContent = answered;
+}
+
+function submitQuiz() {
+  graded = true;
+  let correct = 0, wrong = 0, skip = 0;
+
+  allQuestions.forEach((q, gi) => {
+    const card = document.getElementById('card-' + gi);
+    const answered = gi in userAnswers;
+    if (!answered) { skip++; return; }
+
+    const chosen = userAnswers[gi];
+    const isCorrect = chosen === q.a;
+    if (isCorrect) correct++; else wrong++;
+
+    card.classList.remove('answered');
+    card.classList.add(isCorrect ? 'correct' : 'wrong');
+
+    const opts = document.querySelectorAll(`#opts-${gi} .option`);
+    opts.forEach((o, i) => {
+      o.classList.remove('selected');
+      if (i === q.a) o.classList.add('correct-ans');
+      else if (i === chosen && !isCorrect) o.classList.add('wrong-ans');
+    });
+
+    document.getElementById('exp-' + gi).classList.add('show');
+  });
+
+  const pct = Math.round(correct / 150 * 100);
+  const grade = pct >= 90 ? '🏆 Distinction' : pct >= 75 ? '✅ Pass' : pct >= 50 ? '⚠️ Borderline' : '❌ Needs Work';
+  document.getElementById('final-pct').textContent = pct + '%';
+  document.getElementById('final-label').textContent = grade + ` — ${correct}/150 correct`;
+  document.getElementById('sc-correct').textContent = correct;
+  document.getElementById('sc-wrong').textContent = wrong;
+  document.getElementById('sc-skip').textContent = skip;
+  document.getElementById('score-count').textContent = pct + '%';
+  document.getElementById('scorecard').style.display = 'block';
+  document.getElementById('scorecard').scrollIntoView({behavior:'smooth'});
+}
+
+function resetQuiz() {
+  userAnswers = {};
+  graded = false;
+  document.getElementById('scorecard').style.display = 'none';
+  document.getElementById('score-count').textContent = '—';
+  updateProgress();
+  buildQuestions();
+  if (mode === 'key') applyKeyMode();
+}
+
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll('.mode-btns .btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  if (m === 'key') {
+    document.body.classList.add('key-mode');
+    applyKeyMode();
+  } else {
+    document.body.classList.remove('key-mode');
+    removeKeyMode();
+  }
+}
+
+function applyKeyMode() {
+  allQuestions.forEach((q, gi) => {
+    const opts = document.querySelectorAll(`#opts-${gi} .option`);
+    opts.forEach((o, i) => {
+      o.classList.toggle('reveal-correct', i === q.a);
+    });
+    document.getElementById('exp-' + gi).classList.add('show');
+  });
+}
+
+function removeKeyMode() {
+  allQuestions.forEach((q, gi) => {
+    if (graded) return;
+    document.querySelectorAll(`#opts-${gi} .option`).forEach(o => {
+      o.classList.remove('reveal-correct');
+    });
+    document.getElementById('exp-' + gi).classList.remove('show');
+  });
+}
+
+buildUI();
+</script>
+</body>
+</html>

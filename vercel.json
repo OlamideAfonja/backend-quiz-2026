@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "php_quiz.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/",
+      "dest": "/php_quiz.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/php_quiz.html"
+    }
+  ]
+}
